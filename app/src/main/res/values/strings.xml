@@ -1,4 +1,9 @@
 <resources>
     <string name="app_name">MusicPlayer</string>
     <string name="track_name">Track Name</string>
+    <string name="band_name">Band Name</string>
+    <string name="album_cover">Albun Cover</string>
+    <string name="prev_button">Prev Button</string>
+    <string name="play_button">Play Button</string>
+    <string name="next_button">Next Button</string>
 </resources>
