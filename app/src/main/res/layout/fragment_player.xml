@@ -16,6 +16,7 @@
             android:layout_height="@dimen/min_size"
             android:layout_marginTop="100dp"
             android:contentDescription="@string/album_cover"
+            android:src="@drawable/cover"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.504"
             app:layout_constraintStart_toStartOf="parent"
@@ -25,13 +26,13 @@
             android:id="@+id/track_title"
             android:layout_width="@dimen/min_size"
             android:layout_height="wrap_content"
-            android:layout_marginTop="72dp"
+            android:layout_marginTop="40dp"
             android:text="@string/track_name"
             android:textColor="@color/white"
             android:textSize="20sp"
             android:textStyle="bold"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.495"
+            app:layout_constraintHorizontal_bias="0.49"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/cover_photo" />
 
@@ -118,8 +119,8 @@
 
             <ImageButton
                 android:id="@+id/play_btn"
-                android:layout_width="20dp"
-                android:layout_height="70dp"
+                android:layout_width="0dp"
+                android:layout_height="78dp"
                 android:layout_weight="1"
                 android:background="@drawable/btn_bg"
                 android:backgroundTint="@color/white"
