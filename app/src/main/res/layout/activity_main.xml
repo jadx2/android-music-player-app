@@ -3,6 +3,12 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <data>
+        <variable
+            name="trackInfo"
+            type="com.example.musicplayer.TrackInfo" />
+    </data>
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/constraint_layout"
         android:layout_width="match_parent"
@@ -27,7 +33,7 @@
             android:layout_width="@dimen/min_size"
             android:layout_height="wrap_content"
             android:layout_marginTop="72dp"
-            android:text="@string/track_name"
+            android:text="@={trackInfo.title}"
             android:textColor="@color/white"
             android:textSize="20sp"
             android:textStyle="bold"
@@ -40,7 +46,7 @@
             android:id="@+id/band_name"
             android:layout_width="@dimen/min_size"
             android:layout_height="wrap_content"
-            android:text="@string/band_name"
+            android:text="@={trackInfo.bandName}"
             android:textColor="@android:color/darker_gray"
             android:textSize="14sp"
             app:layout_constraintEnd_toEndOf="parent"
@@ -76,7 +82,7 @@
             app:layout_constraintTop_toTopOf="@+id/seekBar">
 
             <TextView
-                android:id="@+id/song_start"
+                android:id="@+id/song_current"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
