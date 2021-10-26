@@ -6,7 +6,6 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.util.Log
 import android.view.*
 import androidx.fragment.app.Fragment
 import android.widget.SeekBar
@@ -29,14 +28,19 @@ class PlayerFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_player, container, false)
-        mediaPlayer = MediaPlayer.create(activity, trackList[songIndex])
-        songName = resources.getResourceName(trackList[songIndex])
-
         setHasOptionsMenu(true)
-        initializeSeekBar()
         return binding.root
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        mediaPlayer = MediaPlayer.create(activity, trackList[songIndex])
+        songName = resources.getResourceName(trackList[songIndex])
+    }
+
+    /***
+     * Creates the floating menu
+     */
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
         inflater.inflate(R.menu.overflown_menu, menu)
@@ -49,6 +53,9 @@ class PlayerFragment : Fragment() {
         ) || super.onOptionsItemSelected(item)
     }
 
+    /***
+     * Plays or pauses song
+     */
     private fun playPause() {
         if (!mediaPlayer.isPlaying) {
             mediaPlayer.start()
@@ -59,43 +66,50 @@ class PlayerFragment : Fragment() {
         }
     }
 
+    /***
+     * Moves to previous song
+     */
     private fun nextSong() {
-        if (mediaPlayer.isPlaying) {
-            if (songIndex < trackList.size - 1) {
-                mediaPlayer.reset()
-                songIndex++
-            } else {
-                mediaPlayer.reset()
-                songIndex = 0
-            }
-
-            mediaPlayer = MediaPlayer.create(activity, trackList[songIndex])
-            songDuration = mediaPlayer.duration
-            songName = resources.getResourceName(trackList[songIndex])
-            getMeta(songName)
-            binding.songEnd.text = convertToTime(songDuration)
-            mediaPlayer.start()
+        if (songIndex < trackList.size - 1) {
+            mediaPlayer.reset()
+            songIndex++
+        } else {
+            mediaPlayer.reset()
+            songIndex = 0
         }
+
+        mediaPlayer = MediaPlayer.create(activity, trackList[songIndex])
+        songDuration = mediaPlayer.duration
+        songName = resources.getResourceName(trackList[songIndex])
+        getMeta(songName)
+        initializeSeekBar()
+        binding.songEnd.text = convertToTime(songDuration)
+        playPause()
     }
 
+    /***
+     * Moves to next song
+     */
     private fun prevSong() {
-        if (mediaPlayer.isPlaying) {
-            if (songIndex > 0) {
-                mediaPlayer.reset()
-                songIndex--
-            } else {
-                mediaPlayer.reset()
-                songIndex = trackList.size - 1
-            }
-
-            mediaPlayer = MediaPlayer.create(activity, trackList[songIndex])
-            songDuration = mediaPlayer.duration
-            songName = resources.getResourceName(trackList[songIndex])
-            binding.songEnd.text = convertToTime(songDuration)
-            mediaPlayer.start()
+        if (songIndex > 0) {
+            mediaPlayer.reset()
+            songIndex--
+        } else {
+            mediaPlayer.reset()
+            songIndex = trackList.size - 1
         }
+
+        mediaPlayer = MediaPlayer.create(activity, trackList[songIndex])
+        songDuration = mediaPlayer.duration
+        songName = resources.getResourceName(trackList[songIndex])
+        initializeSeekBar()
+        binding.songEnd.text = convertToTime(songDuration)
+        playPause()
     }
 
+    /***
+     * Moves song to the where the seekbar is dragged to
+     */
     private fun seekBarChangeHandler() {
         binding.seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, changed: Boolean) {
@@ -110,23 +124,33 @@ class PlayerFragment : Fragment() {
 
     }
 
+    /***
+     * Initializes the seekbar and functionality of it's self update
+     */
     private fun initializeSeekBar() {
         binding.seekBar.max = mediaPlayer.duration
         val handler = Handler(Looper.getMainLooper())
         handler.postDelayed(object : Runnable {
             override fun run() {
                 binding.seekBar.progress = mediaPlayer.currentPosition
+                binding.songCurrent.text = convertToTime(mediaPlayer.currentPosition)
                 handler.postDelayed(this, DEFAULT_DELAY)
             }
         }, 0)
     }
 
+    /***
+     * Formats timestamps
+     */
     private fun convertToTime(milliseconds: Int): String {
         val minutes = milliseconds / TO_SECONDS / TO_MINUTES
         val seconds = milliseconds / TO_SECONDS % TO_MINUTES
         return String.format("%02d:%02d", minutes, seconds)
     }
 
+    /***
+     * Get's the song metadata from source file
+     */
     private fun getMeta(path: String) {
         val fileName = path.split("/")[1]
         val uriPath = "android.resource://" + activity?.packageName + "/raw/$fileName"
@@ -139,13 +163,13 @@ class PlayerFragment : Fragment() {
         binding.bandName.text = artist
     }
 
-    override fun onResume() {
-        super.onResume()
-        Log.wtf("Jaa", mediaPlayer.currentPosition.toString())
+    override fun onStart() {
+        super.onStart()
         songName = resources.getResourceName(trackList[songIndex])
-        songDuration = mediaPlayer.duration
-        binding.songEnd.text = convertToTime(songDuration)
+        binding.songEnd.text = convertToTime(mediaPlayer.duration)
         binding.seekBar.max = songDuration
+
+        if (mediaPlayer.isPlaying) binding.playBtn.setImageResource(R.drawable.pause_arrow)
 
         binding.playBtn.setOnClickListener {
             playPause()
@@ -159,10 +183,14 @@ class PlayerFragment : Fragment() {
             prevSong()
         }
 
+        initializeSeekBar()
         seekBarChangeHandler()
         getMeta(songName)
     }
 
+    /***
+     * Cleans the memory after killing the app
+     */
     override fun onDestroy() {
         super.onDestroy()
         if (!mediaPlayer.isPlaying) {
