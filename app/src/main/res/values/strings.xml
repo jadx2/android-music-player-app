@@ -10,10 +10,10 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="details">Details</string>
     <string name="music_player">Music Player</string>
-    <string name="song_details">Song Details</string>
     <string name="title">Title:</string>
     <string name="artist">Artist:</string>
     <string name="album">Album:</string>
     <string name="year">Year:</string>
     <string name="genre">Genre:</string>
+    <string name="song_details">Song Details</string>
 </resources>

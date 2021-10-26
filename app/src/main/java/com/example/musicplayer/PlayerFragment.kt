@@ -1,92 +1,61 @@
 package com.example.musicplayer
 
+import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
+import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
+import android.view.*
 import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.Button
-import android.widget.ImageButton
 import android.widget.SeekBar
-import android.widget.TextView
 import androidx.databinding.DataBindingUtil
-import androidx.navigation.Navigation
 import androidx.navigation.findNavController
+import androidx.navigation.ui.NavigationUI
 import com.example.musicplayer.databinding.FragmentPlayerBinding
-
 
 class PlayerFragment : Fragment() {
 
+    private lateinit var binding: FragmentPlayerBinding
+    private val trackList = arrayListOf(R.raw.cowboys_from_hell, R.raw.primal_concrete_sledge)
     private lateinit var mediaPlayer: MediaPlayer
-    private lateinit var detailsButton: Button
-    private lateinit var playButton: ImageButton
-    private lateinit var nextButton: ImageButton
-    private lateinit var prevButton: ImageButton
-    private lateinit var seekBar: SeekBar
-    private lateinit var trackList: ArrayList<Int>
-    private lateinit var title: TextView
-    private lateinit var band: TextView
+    private lateinit var songName: String
     private var songIndex = 0
     private var songDuration = 0
-    private lateinit var songCurrent: TextView
-    private lateinit var songEnd: TextView
-    private lateinit var runnable: Runnable
-    private val handler = Handler(Looper.getMainLooper())
-//    private val trackBroadcastReceiver = TrackBroadcastReceiver()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        val binding: FragmentPlayerBinding =
-            DataBindingUtil.inflate(inflater, R.layout.fragment_player, container, false)
-        trackList = arrayListOf(R.raw.cowboys_from_hell, R.raw.primal_concrete_sledge)
-        title = binding.trackTitle
-        band = binding.bandName
-        detailsButton = binding.detailsButton
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_player, container, false)
         mediaPlayer = MediaPlayer.create(activity, trackList[songIndex])
-        playButton = binding.playBtn
-        nextButton = binding.nextBtn
-        prevButton = binding.prevBtn
-        seekBar = binding.seekBar
-        songDuration = mediaPlayer.duration
-        songEnd = binding.songEnd
-        songCurrent = binding.songCurrent
-        songEnd.text = convertToTime(songDuration)
-        seekBar.progress = 0
-        seekBar.max = songDuration
+        songName = resources.getResourceName(trackList[songIndex])
 
-        playButton.setOnClickListener {
-            playPause()
-        }
-
-        nextButton.setOnClickListener {
-            nextSong()
-        }
-
-        prevButton.setOnClickListener {
-            prevSong()
-        }
-
-        seekBarHandler()
-
-        detailsButton.setOnClickListener(
-            Navigation.createNavigateOnClickListener(R.id.action_playerFragment_to_detailsFragment)
-        )
-
+        setHasOptionsMenu(true)
+        initializeSeekBar()
         return binding.root
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.overflown_menu, menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return NavigationUI.onNavDestinationSelected(
+            item,
+            view?.findNavController()!!
+        ) || super.onOptionsItemSelected(item)
     }
 
     private fun playPause() {
         if (!mediaPlayer.isPlaying) {
             mediaPlayer.start()
-            playButton.setImageResource(R.drawable.pause_arrow)
+            binding.playBtn.setImageResource(R.drawable.pause_arrow)
         } else {
             mediaPlayer.pause()
-            playButton.setImageResource(R.drawable.play_arrow)
+            binding.playBtn.setImageResource(R.drawable.play_arrow)
         }
     }
 
@@ -102,7 +71,9 @@ class PlayerFragment : Fragment() {
 
             mediaPlayer = MediaPlayer.create(activity, trackList[songIndex])
             songDuration = mediaPlayer.duration
-            songEnd.text = convertToTime(songDuration)
+            songName = resources.getResourceName(trackList[songIndex])
+            getMeta(songName)
+            binding.songEnd.text = convertToTime(songDuration)
             mediaPlayer.start()
         }
     }
@@ -119,13 +90,14 @@ class PlayerFragment : Fragment() {
 
             mediaPlayer = MediaPlayer.create(activity, trackList[songIndex])
             songDuration = mediaPlayer.duration
-            songEnd.text = convertToTime(songDuration)
+            songName = resources.getResourceName(trackList[songIndex])
+            binding.songEnd.text = convertToTime(songDuration)
             mediaPlayer.start()
         }
     }
 
-    private fun seekBarHandler() {
-        seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+    private fun seekBarChangeHandler() {
+        binding.seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, changed: Boolean) {
                 if (changed) {
                     mediaPlayer.seekTo(progress)
@@ -133,59 +105,75 @@ class PlayerFragment : Fragment() {
             }
 
             override fun onStartTrackingTouch(seekBar: SeekBar?) {}
-
             override fun onStopTrackingTouch(seekBar: SeekBar?) {}
         })
 
-        runnable = Runnable {
-            seekBar.progress = mediaPlayer.currentPosition
-            songCurrent.text = convertToTime(mediaPlayer.currentPosition)
-            handler.postDelayed(runnable, 1000)
-        }
-        handler.postDelayed(runnable, 1000)
-        mediaPlayer.setOnCompletionListener {
-            playButton.setImageResource(R.drawable.play_arrow)
-            seekBar.progress = 0
-        }
     }
 
+    private fun initializeSeekBar() {
+        binding.seekBar.max = mediaPlayer.duration
+        val handler = Handler(Looper.getMainLooper())
+        handler.postDelayed(object : Runnable {
+            override fun run() {
+                binding.seekBar.progress = mediaPlayer.currentPosition
+                handler.postDelayed(this, DEFAULT_DELAY)
+            }
+        }, 0)
+    }
 
     private fun convertToTime(milliseconds: Int): String {
-        val minutes = milliseconds / 1000 / 60
-        val seconds = milliseconds / 1000 % 60
+        val minutes = milliseconds / TO_SECONDS / TO_MINUTES
+        val seconds = milliseconds / TO_SECONDS % TO_MINUTES
         return String.format("%02d:%02d", minutes, seconds)
     }
 
-//    override fun onResume() {
-//        super.onResume()
-//        val iF = IntentFilter()
-//        iF.addAction("com.android.music.metachanged");
-//
-//        iF.addAction("com.htc.music.metachanged");
-//
-//        iF.addAction("fm.last.android.metachanged");
-//        iF.addAction("com.sec.android.app.music.metachanged");
-//        iF.addAction("com.nullsoft.winamp.metachanged");
-//        iF.addAction("com.amazon.mp3.metachanged");
-//        iF.addAction("com.miui.player.metachanged");
-//        iF.addAction("com.real.IMP.metachanged");
-//        iF.addAction("com.sonyericsson.music.metachanged");
-//        iF.addAction("com.rdio.android.metachanged");
-//        iF.addAction("com.samsung.sec.android.MusicPlayer.metachanged");
-//        iF.addAction("com.andrew.apollo.metachanged");
-//        activity?.registerReceiver(trackBroadcastReceiver, iF)
-//    }
-//
-//    override fun onPause() {
-//        super.onPause()
-//        activity?.unregisterReceiver(trackBroadcastReceiver)
-//    }
+    private fun getMeta(path: String) {
+        val fileName = path.split("/")[1]
+        val uriPath = "android.resource://" + activity?.packageName + "/raw/$fileName"
+        val uri = Uri.parse(uriPath)
+        val metaRetriever = MediaMetadataRetriever()
+        metaRetriever.setDataSource(context, uri)
+        val artist = metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST)
+        val song = metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE)
+        binding.trackTitle.text = song
+        binding.bandName.text = artist
+    }
 
+    override fun onResume() {
+        super.onResume()
+        Log.wtf("Jaa", mediaPlayer.currentPosition.toString())
+        songName = resources.getResourceName(trackList[songIndex])
+        songDuration = mediaPlayer.duration
+        binding.songEnd.text = convertToTime(songDuration)
+        binding.seekBar.max = songDuration
+
+        binding.playBtn.setOnClickListener {
+            playPause()
+        }
+
+        binding.nextBtn.setOnClickListener {
+            nextSong()
+        }
+
+        binding.prevBtn.setOnClickListener {
+            prevSong()
+        }
+
+        seekBarChangeHandler()
+        getMeta(songName)
+    }
 
     override fun onDestroy() {
         super.onDestroy()
         if (!mediaPlayer.isPlaying) {
+            mediaPlayer.stop()
             mediaPlayer.release()
         }
+    }
+
+    companion object {
+        const val DEFAULT_DELAY = 1000L
+        const val TO_SECONDS = 1000
+        const val TO_MINUTES = 60
     }
 }
