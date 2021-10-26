@@ -1,7 +1,5 @@
 package com.example.musicplayer
 
-import android.content.IntentFilter
-import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
 import android.os.Bundle
 import android.os.Handler
@@ -10,16 +8,20 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.ImageButton
 import android.widget.SeekBar
 import android.widget.TextView
 import androidx.databinding.DataBindingUtil
+import androidx.navigation.Navigation
+import androidx.navigation.findNavController
 import com.example.musicplayer.databinding.FragmentPlayerBinding
 
 
 class PlayerFragment : Fragment() {
 
     private lateinit var mediaPlayer: MediaPlayer
+    private lateinit var detailsButton: Button
     private lateinit var playButton: ImageButton
     private lateinit var nextButton: ImageButton
     private lateinit var prevButton: ImageButton
@@ -44,6 +46,7 @@ class PlayerFragment : Fragment() {
         trackList = arrayListOf(R.raw.cowboys_from_hell, R.raw.primal_concrete_sledge)
         title = binding.trackTitle
         band = binding.bandName
+        detailsButton = binding.detailsButton
         mediaPlayer = MediaPlayer.create(activity, trackList[songIndex])
         playButton = binding.playBtn
         nextButton = binding.nextBtn
@@ -69,6 +72,10 @@ class PlayerFragment : Fragment() {
         }
 
         seekBarHandler()
+
+        detailsButton.setOnClickListener(
+            Navigation.createNavigateOnClickListener(R.id.action_playerFragment_to_detailsFragment)
+        )
 
         return binding.root
     }
@@ -118,7 +125,7 @@ class PlayerFragment : Fragment() {
     }
 
     private fun seekBarHandler() {
-        seekBar.setOnSeekBarChangeListener(object: SeekBar.OnSeekBarChangeListener {
+        seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, changed: Boolean) {
                 if (changed) {
                     mediaPlayer.seekTo(progress)
