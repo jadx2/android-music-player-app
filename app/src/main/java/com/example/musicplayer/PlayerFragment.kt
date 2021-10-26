@@ -102,6 +102,7 @@ class PlayerFragment : Fragment() {
         mediaPlayer = MediaPlayer.create(activity, trackList[songIndex])
         songDuration = mediaPlayer.duration
         songName = resources.getResourceName(trackList[songIndex])
+        getMeta(songName)
         initializeSeekBar()
         binding.songEnd.text = convertToTime(songDuration)
         playPause()
