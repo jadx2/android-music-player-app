@@ -3,5 +3,5 @@
 
     <item
         android:id="@+id/detailsFragment"
-        android:title="@string/song_details" />
+        android:title="@string/band_details_menu" />
 </menu>

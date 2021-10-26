@@ -2,7 +2,7 @@
     <string name="app_name">Music Player</string>
     <string name="track_name">Track Name</string>
     <string name="band_name">Band Name</string>
-    <string name="album_cover">Albun Cover</string>
+    <string name="album_cover">Album Cover</string>
     <string name="prev_button">Prev Button</string>
     <string name="play_button">Play Button</string>
     <string name="next_button">Next Button</string>
@@ -10,7 +10,7 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="details">Details</string>
     <string name="music_player">Music Player</string>
-    <string name="song_details">Song Details</string>
+    <string name="band_details_menu">Band Details</string>
     <string name="band_details">Pantera was an American heavy metal band from Arlington, Texas, formed in 1981. The group\'s best-known lineup consisted of the Abbott brothers (drummer Vinnie Paul and guitarist Dimebag
     Darrell), along with vocalist Phil Anselmo and bassist Rex Brown. In addition to their
     development and popularization of the groove metal subgenre, Pantera is credited (along with
@@ -18,4 +18,4 @@
     thrash metal scene from the late 1980s to early-to-mid 1990s. Pantera is regarded as one
     of the most successful and influential bands in heavy metal history, having sold around 20
     million records worldwide[4] and having received four Grammy nominations.</string>
-    </resources>
+</resources>
