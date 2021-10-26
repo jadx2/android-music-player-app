@@ -1,6 +1,7 @@
 package com.example.musicplayer
 
 import android.content.IntentFilter
+import android.media.MediaMetadataRetriever
 import android.media.MediaPlayer
 import android.os.Bundle
 import android.os.Handler
@@ -24,13 +25,15 @@ class PlayerFragment : Fragment() {
     private lateinit var prevButton: ImageButton
     private lateinit var seekBar: SeekBar
     private lateinit var trackList: ArrayList<Int>
+    private lateinit var title: TextView
+    private lateinit var band: TextView
     private var songIndex = 0
     private var songDuration = 0
     private lateinit var songCurrent: TextView
     private lateinit var songEnd: TextView
     private lateinit var runnable: Runnable
     private val handler = Handler(Looper.getMainLooper())
-    private val trackBroadcastReceiver = TrackBroadcastReceiver()
+//    private val trackBroadcastReceiver = TrackBroadcastReceiver()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -39,6 +42,8 @@ class PlayerFragment : Fragment() {
         val binding: FragmentPlayerBinding =
             DataBindingUtil.inflate(inflater, R.layout.fragment_player, container, false)
         trackList = arrayListOf(R.raw.cowboys_from_hell, R.raw.primal_concrete_sledge)
+        title = binding.trackTitle
+        band = binding.bandName
         mediaPlayer = MediaPlayer.create(activity, trackList[songIndex])
         playButton = binding.playBtn
         nextButton = binding.nextBtn
